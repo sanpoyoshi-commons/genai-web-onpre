@@ -1,0 +1,15 @@
+**/.DS_Store
+node_modules/
+cdk.out/
+/*/dist/**
+ToDo.md
+!.gitkeep
+.env
+
+
+# MkDocs documentation
+site*/
+.cache
+
+# セキュリティスキャン出力（ローカル検証専用、commit しない）
+security-reports/

@@ -1,0 +1,26 @@
+import { Link } from 'react-router';
+
+type Props = {
+  isLandingPage?: boolean;
+};
+
+const logoTypographyStyles =
+  'text-std-18B-160 leading-120! text-solid-gray-900 lg:text-std-22B-150';
+
+export const Logo = (props: Props) => {
+  const { isLandingPage } = props;
+  return (
+    <div className='relative flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-4'>
+      {isLandingPage ? (
+        <h1 className={`${logoTypographyStyles}`}>オンプレ AI 環境</h1>
+      ) : (
+        <Link
+          to='/'
+          className={`${logoTypographyStyles} focus-visible:rounded-4 focus-visible:bg-yellow-300 focus-visible:ring-[calc(2/16*1rem)] focus-visible:ring-yellow-300 focus-visible:outline-4 focus-visible:outline-offset-[calc(2/16*1rem)] focus-visible:outline-black focus-visible:outline-solid`}
+        >
+          オンプレ AI 環境
+        </Link>
+      )}
+    </div>
+  );
+};

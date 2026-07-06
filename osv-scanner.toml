@@ -1,0 +1,48 @@
+# OSV-Scanner ベースライン（genai-web-onpre）
+#
+# 方針: monorepo root の package-lock.json を scan すると、配信対象の packages/web と
+# 上流参考由来の非配信依存（AWS SDK / @aws-crypto）が混在計上される。以下は
+# 「上流参考依存のみに存在し、配信web には到達しない」脆弱性。
+# 切り分け根拠: `npm ls <pkg> -w packages/web` で web 到達 0 を確認済（2026-06-10）。
+#
+# ignoreUntil で再評価を強制する（恒久 ignore にしない）。期限到来時は再 scan し、
+# 上流参考依存（AWS SDK / @aws-crypto）の更新有無と web 非到達を再確認すること。
+# 配信web側の脆弱性（react-router/mermaid/postcss/uuid）は 2026-06-10 に修正済み。
+
+[[IgnoredVulns]]
+id = "GHSA-q3j6-qgpj-74h6"
+ignoreUntil = 2026-09-10
+reason = "fast-uri@3.1.0 (path traversal). 上流参考依存（AWS SDK）由来のみ。配信web 非到達。"
+
+[[IgnoredVulns]]
+id = "GHSA-v39h-62p7-jpjc"
+ignoreUntil = 2026-09-10
+reason = "fast-uri@3.1.0 (host confusion). 上流参考依存（AWS SDK）由来のみ。配信web 非到達。"
+
+[[IgnoredVulns]]
+id = "GHSA-5wm8-gmm8-39j9"
+ignoreUntil = 2026-09-10
+reason = "fast-xml-builder@1.1.4 (attribute bypass). 上流参考依存（AWS SDK）由来のみ。配信web 非到達。"
+
+[[IgnoredVulns]]
+id = "GHSA-gh4j-gqv2-49f6"
+ignoreUntil = 2026-09-10
+reason = "fast-xml-parser@5.5.8 (comment/CDATA injection). 上流参考依存（AWS SDK）由来のみ。配信web 非到達。"
+
+[[IgnoredVulns]]
+id = "GHSA-jxxr-4gwj-5jf2"
+ignoreUntil = 2026-09-10
+reason = "brace-expansion@5.0.5 (range DoS). 上流参考依存由来のみ。配信web 非到達。"
+
+[[IgnoredVulns]]
+id = "GHSA-w5hq-g745-h8pq"
+ignoreUntil = 2026-09-10
+reason = "uuid@9/10 (v3/v5/v6+buf bounds). 上流参考依存（@aws-crypto/client-node）由来のみ。当該コードは v4 使用で非該当・配信web 非到達。"
+
+# --- 非ランタイム（dev/build/test）の undici / vite は 2026-07-03 に実バンプで解消し allowlist から除去。
+# runtime 到達分（dompurify）は別途 3.4.11 へバンプ済。
+#   - vite 8.0.8 → 8.0.16（root overrides で固定）＝CVE-2026-53571/GHSA-fx2h-pf6j-xcff・GHSA-v6wh-96g9-6wx3 解消。
+#   - undici 7.24.7 → 7.28.0（root overrides で jsdom 経由の推移依存を固定）＝CVE-2026-12151 他 7 GHSA 解消。
+# ＝これらは ignoreUntil ではなく「修正済み」。除去により将来の undici/vite 脆弱性が allowlist で隠れないようにする。
+# 残る fast-uri / fast-xml-builder / fast-xml-parser（上の 2026-09-10 分）は上流参考依存（AWS SDK）・
+# @aws-sdk Bedrock 残渣で配信web 非到達のため ignoreUntil を継続（AWS 残渣の死依存整理で再評価）。
