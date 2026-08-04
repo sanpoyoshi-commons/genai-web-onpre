@@ -19,14 +19,15 @@ export const useLawRag = () => {
   const api = useLawRagApi();
   const { response, loading, error, setResponse, setLoading, setError, clear } = useLawRagStore();
 
-  const ask = async (question: string, modelId?: string) => {
+  const ask = async (question: string, modelId?: string, asOfDate?: string) => {
     setLoading(true);
     setError(null);
     setResponse(null);
 
     try {
       const req: LawRagQueryRequest = {
-        inputs: { question },
+        // 参照時点は未指定なら送らない（api 側の既定＝現行での回答になる）。
+        inputs: { question, ...(asOfDate ? { as_of_date: asOfDate } : {}) },
         // 未指定なら api 既定モデルへ委譲。指定時は MODEL_IDS 許可リスト内のみ
         // （api 側 resolveTextModel が検証し、許可外は 400）。
         ...(modelId ? { model: { modelId } } : {}),

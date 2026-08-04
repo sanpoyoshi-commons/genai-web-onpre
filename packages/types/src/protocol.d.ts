@@ -191,13 +191,43 @@ export type CodeInterpreterResponse = {
 export type LawRagQueryRequest = {
   inputs: {
     question: string;
+    // 参照時点（YYYY-MM-DD・任意）。未指定＝今日時点で施行されている法令（現行）で回答する。
+    // 指定時は未施行条文も候補に含め、その時点で施行されている版を構造的に解決して引用する。
+    as_of_date?: string;
   };
   model?: {
     modelId?: string;
   };
 };
 
+// 引用条文 1 件分の版メタ（施行日バッジ用）。レポート本文の「## 出典」と同じ内容を構造化したもの。
+export type LawRagReference = {
+  // 元の引用番号（レポート本文の [n] に対応・非連続でありうる）。
+  n: number;
+  // 出典表示名（法令名＋条見出し）。
+  title: string;
+  // e-Gov 法令検索 URL。
+  url: string;
+  // 採用した版の施行日 YYYY-MM-DD（不明は null）。年が 2100 以降は施行日未定のプレースホルダ。
+  enforceDate: string | null;
+  // 未施行フラグ（今日時点でまだ効力を持たない版）。
+  isFuture: boolean;
+  // 改正予定＝この版より後の次版施行日（無ければ null）。
+  nextEnforceDate: string | null;
+};
+
+// データ基準日（システムの知識時点＝法令データの取得日と配布タグ）。
+export type LawRagDataAsOf = {
+  egovFetchDate: string;
+  releaseTag: string;
+};
+
+// outputs / usageMetadata は不変で、以下は追加フィールド（api が返さない場合は載らない＝後方互換）。
 export type LawRagQueryResponse = {
   outputs: string;
   usageMetadata: unknown[];
+  // 版解決に使った参照時点（as_of_date 指定時のみ）。
+  asOfDate?: string;
+  dataAsOf?: LawRagDataAsOf;
+  references?: LawRagReference[];
 };

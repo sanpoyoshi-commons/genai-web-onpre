@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { Markdown } from '@/components/Markdown';
 import { ButtonCopy } from '@/components/ui/ButtonCopy';
 import { useLawRag } from '../hooks/useLawRag';
+import { LawRagVersions } from './LawRagVersions';
 
 export const LawRagResult = () => {
   const { response, loading, error } = useLawRag();
@@ -35,6 +36,8 @@ export const LawRagResult = () => {
             <div ref={copyTextRef}>
               <Markdown>{response.outputs}</Markdown>
             </div>
+            {/* 版の一覧はコピー対象（copyTextRef）の外に置く＝コピーされるのはレポート本文のみ。 */}
+            <LawRagVersions response={response} />
           </>
         )}
       </div>

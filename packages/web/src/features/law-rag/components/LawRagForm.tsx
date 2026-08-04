@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { Button } from '@/components/ui/dads/Button';
 import { ErrorText } from '@/components/ui/dads/ErrorText';
+import { Input } from '@/components/ui/dads/Input';
 import { Label } from '@/components/ui/dads/Label';
 import { RequirementBadge } from '@/components/ui/dads/RequirementBadge';
 import { SupportText } from '@/components/ui/dads/SupportText';
@@ -11,6 +12,7 @@ import { useSelectedModel } from '@/hooks/useSelectedModel';
 import { findModelDisplayNameByModelId, MODELS } from '@/models';
 import { useLawRag } from '../hooks/useLawRag';
 import { type LawRagFormSchema, lawRagFormSchema } from '../schema';
+import { todayIso } from '../utils/asOf';
 
 export const LawRagForm = () => {
   const { loading, ask } = useLawRag();
@@ -30,7 +32,7 @@ export const LawRagForm = () => {
     if (loading) {
       return;
     }
-    ask(data.question, selectedModelId);
+    ask(data.question, selectedModelId, data.asOfDate?.trim() || undefined);
   });
 
   return (
@@ -58,6 +60,31 @@ export const LawRagForm = () => {
           />
           {errors.question && (
             <ErrorText id='law-rag-question-error'>＊{errors.question.message}</ErrorText>
+          )}
+        </div>
+
+        <div className='mt-6 flex flex-col gap-1.5'>
+          <Label htmlFor='law-rag-as-of-date' size='lg'>
+            参照時点
+          </Label>
+          <SupportText id='law-rag-as-of-date-support'>
+            未入力の場合は、今日時点で施行されている法令（現行）で回答します。将来の日付を指定すると、その時点で施行されている版（未施行の改正後条文）で回答します。過去の日付は指定できません。
+          </SupportText>
+          <Input
+            id='law-rag-as-of-date'
+            type='date'
+            className='w-56'
+            min={todayIso()}
+            isError={!!errors.asOfDate}
+            aria-describedby={
+              errors.asOfDate
+                ? 'law-rag-as-of-date-support law-rag-as-of-date-error'
+                : 'law-rag-as-of-date-support'
+            }
+            {...register('asOfDate')}
+          />
+          {errors.asOfDate && (
+            <ErrorText id='law-rag-as-of-date-error'>＊{errors.asOfDate.message}</ErrorText>
           )}
         </div>
 
