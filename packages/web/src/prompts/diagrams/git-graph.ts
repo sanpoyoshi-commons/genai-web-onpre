@@ -6,6 +6,8 @@ export const GitgraphPrompt = `<instruction>
 3. 生成するGitグラフ図の詳しい説明や解説は<Description></Description>タグの中に出力してください。
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<Information></Information>を参考に出力してください。
+6. 必ず最初の行に「gitGraph」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
+7. 方向を指定する場合は「gitGraph LR:」のように必ず末尾にコロンを付けてください。コロンが無いと描画に失敗します。方向の指定は必須ではありません。
 
 <Information>
 Part 1: 基本アーキテクチャと主要コマンド
@@ -25,16 +27,16 @@ cherry-pick: 特定コミットの取り込み
 基本構文要素 
 A) コミットコマンド: 
 gitGraph
-   commit                    //基本コミット
-   commit id: "Alpha"        //IDつきコミット
-   commit tag: "v1.0.0"     //タグつきコミット
+   commit                    %%基本コミット
+   commit id: "Alpha"        %%IDつきコミット
+   commit tag: "v1.0.0"     %%タグつきコミット
 B) ブランチ操作: 
 gitGraph
    commit
-   branch develop           //新規ブランチ作成
-   checkout develop        //ブランチ切り替え
+   branch develop           %%新規ブランチ作成
+   checkout develop        %%ブランチ切り替え
    commit
-   checkout main          //メインブランチに戻る
+   checkout main          %%メインブランチに戻る
 
 3.グラフ方向制御
 A) サポートされる方向: 
@@ -101,11 +103,11 @@ gitGraph
 A) ブランチ作成とチェックアウト: 
 gitGraph
    commit
-   branch develop        //新規ブランチ作成
+   branch develop        %%新規ブランチ作成
    commit
-   checkout main        //既存ブランチへの切り替え
+   checkout main        %%既存ブランチへの切り替え
    commit
-   checkout develop     //developブランチへの切り替え
+   checkout develop     %%developブランチへの切り替え
 B) マージ操作の詳細要件: 
 異なるブランチ間のみマージ可能
 マージコミットは自動生成

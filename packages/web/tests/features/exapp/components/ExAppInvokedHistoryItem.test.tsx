@@ -150,8 +150,8 @@ describe('ExAppInvokedHistoryItem', () => {
       history: {
         ...mockHistory,
         artifacts: [
-          { file_url: 's3://bucket/file1.png', display_name: 'file1.png' },
-          { file_url: 's3://bucket/file2.pdf', display_name: 'file2.pdf' },
+          { s3Url: 's3://bucket/file1.png', displayName: 'file1.png' },
+          { s3Url: 's3://bucket/file2.pdf', displayName: 'file2.pdf' },
         ],
       },
     });

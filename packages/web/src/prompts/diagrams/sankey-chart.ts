@@ -7,6 +7,7 @@ export const SankeychartPrompt = `<instruction>
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<Information></Information>を参考に出力してください。
 6. 出力のMermaidのコードの部分は全て英語で書いてください。
+7. 必ず最初の行に「sankey-beta」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
 
 <Information>
 <概要>

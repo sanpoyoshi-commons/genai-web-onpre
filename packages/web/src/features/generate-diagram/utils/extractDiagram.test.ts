@@ -9,6 +9,39 @@ flowchart LR
     A --> B
 \`\`\``;
 
+// 実機 ELYZA-8B が「アーキテクチャ図」で返した生出力（2026-09-02 観測）。<Description> を
+// ```mermaid フェンスの内側に入れ、閉じフェンスを末尾にまとめて 1 つだけ置いてくる。
+const ELYZA_DESCRIPTION_INSIDE_FENCE = `\`\`\`mermaid
+graph TB
+    subgraph AWS Cloud
+        EC2[Web Server EC2]
+    end
+    User-->EC2
+
+classDef green fill:#9f6,stroke:#333,stroke-width:2px;
+class sq,e green
+<Description>
+オンプレAI基盤の構成は、AWS Cloud上に構築されています。
+</Description>
+\`\`\``;
+
+// 同上だが </Description> を欠くパターン（生成が途中で切れた場合）。
+const ELYZA_UNCLOSED_DESCRIPTION_IN_FENCE = `\`\`\`mermaid
+graph TB
+    User-->EC2
+<Description>
+説明が途中で切れている
+\`\`\``;
+
+// 実機 ELYZA-8B が「シーケンス図」で返した生出力（2026-09-02 観測）。開始タグを書かず
+// 閉じタグだけをフェンスの内側・図の直後に置いてくる。
+const ELYZA_STRAY_CLOSING_TAG = `\`\`\`mermaid
+sequenceDiagram
+    participant ユーザー
+    ユーザー->>Web: ログインリクエスト
+</Description>
+\`\`\``;
+
 // ローカル CPU モデルがフェンスも <Description> も付けずに返した生コード（実機 ELYZA-8B で観測）。
 const BARE = `flowchart LR
     id1@{ shape: manual-file, label: "ユーザー登録" }
@@ -62,6 +95,25 @@ classDef default fill:#f9f,stroke:#333,stroke-width:4px;
 describe('extractDiagramCode', () => {
   it('```mermaid フェンスがあれば中身を抽出する', () => {
     expect(extractDiagramCode(FENCED)).toBe('flowchart LR\n    A --> B');
+  });
+
+  it('<Description> がフェンスの内側にあっても図コードだけを返す', () => {
+    expect(extractDiagramCode(ELYZA_DESCRIPTION_INSIDE_FENCE)).toBe(
+      'graph TB\n    subgraph AWS Cloud\n        EC2[Web Server EC2]\n    end\n    User-->EC2\n\n' +
+        'classDef green fill:#9f6,stroke:#333,stroke-width:2px;\nclass sq,e green',
+    );
+  });
+
+  it('フェンス内の <Description> が閉じられていなくても以降を落とす', () => {
+    expect(extractDiagramCode(ELYZA_UNCLOSED_DESCRIPTION_IN_FENCE)).toBe(
+      'graph TB\n    User-->EC2',
+    );
+  });
+
+  it('開始タグの無い </Description> だけが混ざっても図コードを返す', () => {
+    expect(extractDiagramCode(ELYZA_STRAY_CLOSING_TAG)).toBe(
+      'sequenceDiagram\n    participant ユーザー\n    ユーザー->>Web: ログインリクエスト',
+    );
   });
 
   it('末尾にぶら下がった裸の ``` を含まないコードを返す', () => {

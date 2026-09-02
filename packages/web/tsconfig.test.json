@@ -1,0 +1,7 @@
+{
+  // tsconfig.json は配布ビルド用に src だけを見る。テストも型検査するための設定。
+  // src を含めるのはテストが src を import するため。npm run test から呼ばれる。
+  "extends": "./tsconfig.json",
+  "include": ["src", "tests"],
+  "exclude": []
+}

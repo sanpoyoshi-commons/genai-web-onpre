@@ -209,7 +209,7 @@ describe('TeamList', () => {
 
       // Mock URL.createObjectURL
       const mockUrl = 'blob:http://localhost/123';
-      global.URL.createObjectURL = vi.fn(() => mockUrl);
+      globalThis.URL.createObjectURL = vi.fn(() => mockUrl);
 
       renderWithRouter();
 

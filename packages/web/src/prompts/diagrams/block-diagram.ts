@@ -8,6 +8,7 @@ export const BlockPrompt = `<instruction>
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<formatting_rules>と<mermaid_basics>、<mermaid_advanced>を参考に出力してください。
 6. Mermiadの部分は英語で出力してください。
+7. 必ず最初の行に「block-beta」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
 </constraints>
 
 <information>

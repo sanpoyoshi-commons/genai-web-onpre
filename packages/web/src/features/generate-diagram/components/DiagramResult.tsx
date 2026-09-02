@@ -2,6 +2,7 @@ import { useLocation } from 'react-router';
 import { DiagramRenderer } from '@/features/generate-diagram/components/DiagramRenderer';
 import { useDiagram } from '@/features/generate-diagram/hooks/useDiagram';
 import { useDiagramStore } from '@/features/generate-diagram/stores/useDiagramStore';
+import { correctDiagramCode } from '@/features/generate-diagram/utils/correctDiagramCode';
 import { DIAGRAM_DATA } from '../constants';
 import { Markdown } from './Markdown';
 
@@ -15,11 +16,7 @@ export const DiagramResult = (props: Props) => {
   const { loading, diagramType, isEmpty } = useDiagram(pathname);
   const { diagramGenerationError } = useDiagramStore();
 
-  const correctedDiagramCode = diagramCode
-    .replace(/(^|\s)classDef(?!\s)/gm, '$1classDef ')
-    .replace(/・/g, '/')
-    .replace(/：/g, ':')
-    .replace(/subgraph\s+(.*)/gm, (_, title) => `subgraph ${title.replace(/,/g, '')}`);
+  const correctedDiagramCode = correctDiagramCode(diagramCode);
 
   return (
     <>

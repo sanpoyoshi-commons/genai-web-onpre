@@ -24,6 +24,22 @@ const MERMAID_LEADING_KEYWORDS = [
 
 const DESCRIPTION_BLOCK = /<description>[\s\S]*?<\/description>/i;
 
+// 閉じタグを欠いた <Description>（モデルが途中で切ることがある）。<description> は mermaid の
+// 語彙に無く必ず TAGSTART のパースエラーになるため、出現位置以降は落として構わない。
+const DESCRIPTION_TAIL = /<description>[\s\S]*$/i;
+
+// 開始タグを欠いた </Description>（モデルが閉じタグだけ書くことがある）。開始タグと
+// 対にならないため上の 2 つでは落ちない。タグ自体は mermaid の語彙に無く、後続は
+// 説明ではなく図の続きでありうるので、タグだけを取り除く。
+const DESCRIPTION_STRAY_CLOSE = /<\/description>/gi;
+
+/** 説明ブロックを取り除く。閉じタグがあれば当該ブロックのみ、無ければ以降を丸ごと落とす。 */
+const stripDescription = (text: string): string =>
+  text
+    .replace(DESCRIPTION_BLOCK, '')
+    .replace(DESCRIPTION_TAIL, '')
+    .replace(DESCRIPTION_STRAY_CLOSE, '');
+
 // 図の本文中に現れる mermaid の文キーワード（先頭種別以外）。末尾散文の切り分けに使う。
 const MERMAID_STATEMENT_KEYWORDS = [
   'subgraph',
@@ -75,15 +91,17 @@ const looksLikeMermaid = (text: string): boolean =>
   isMermaidLeadingLine(text.trim().split('\n', 1)[0] ?? '');
 
 // mermaid コードブロック部分のみを抽出。
-// 1) 正規の ```mermaid フェンスがあれば従来どおりその中身。
+// 1) 正規の ```mermaid フェンスがあればその中身。ただしモデルは <Description> をフェンスの
+//    内側に入れ、閉じフェンスを末尾にまとめて置くことがある（実機 ELYZA-8B で観測）。この場合
+//    フェンス内をそのまま返すと散文ごと mermaid に渡りパースエラーになるため、説明は取り除く。
 // 2) フェンスが無くても、<Description> を除いた本文が mermaid コードらしければ採用する
 //    （モデルがフェンス指示を守らないケースのフォールバック）。
 export const extractDiagramCode = (content: string): string => {
   if (content.toLowerCase().includes('```mermaid')) {
-    return content.split('```mermaid')[1].split('```')[0].trim();
+    return stripDescription(content.split('```mermaid')[1].split('```')[0]).trim();
   }
 
-  const body = content.replace(DESCRIPTION_BLOCK, '').trim();
+  const body = stripDescription(content).trim();
 
   // 言語タグ無しの ``` フェンスで囲っているだけのケースは中身を取り出す。
   if (body.includes('```')) {

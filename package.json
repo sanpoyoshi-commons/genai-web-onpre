@@ -11,6 +11,7 @@
     "web:format": "npm -w packages/web run format",
     "web:format:test": "npm -w packages/web run format:test",
     "web:lint": "npm -w packages/web run lint",
+    "web:typecheck": "npm -w packages/web run typecheck",
     "web:test": "npm -w packages/web run test"
   },
   "devDependencies": {

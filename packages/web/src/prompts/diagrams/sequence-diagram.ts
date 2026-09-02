@@ -5,6 +5,7 @@ export const SequencePrompt = `<instruction>
 3. 生成するシーケンス図の詳しい説明や解説は<Description></Description>タグの中に出力してください。
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<Information></Information>を参考に出力してください。
+6. 必ず最初の行に「sequenceDiagram」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
 
 <Information>
 Mermaidのシーケンス図記法

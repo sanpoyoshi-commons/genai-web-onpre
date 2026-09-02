@@ -7,6 +7,7 @@ export const MindmapPrompt = `<instruction>
 3. 生成するマインドマップ図の詳しい説明や解説は<Description></Description>タグの中に出力してください。
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<Information></Information>を参考にしてください。
+6. 必ず最初の行に「mindmap」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
 </Constraints>
 
 <Information>
@@ -14,12 +15,12 @@ Mermaidのマインドマップ記法
 基本構造:
 mindmap
 root((中心トピック))
-トピック1
-サブトピック1.1
-サブトピック1.2
-トピック2
-サブトピック2.1
-サブトピック2.2
+    トピック1
+        サブトピック1.1
+        サブトピック1.2
+    トピック2
+        サブトピック2.1
+        サブトピック2.2
 
 設計のポイント:
 - mindmapキーワードでマインドマップを開始

@@ -6,6 +6,7 @@ export const FlowchartPrompt = `<instruction>
 4. Mermaidの図のコードは \`\`\`mermaid から初めて \`\`\` で終わるように出力してください。
 5. 次の<Information></Information>を参考に出力してください。
 6. Mermaidの図のコードにおいて、「end」という単語を使用する場合は、単語全体または任意の文字を大文字にするか（例:「End」または「END」）、別の言葉に書き換えてください。「end」をすべて小文字で入力すると、フローチャートが正しく動作しなくなります。このルールは全ての「end」に対して適応すること、スタイル時にも適応することが絶対です。
+7. 必ず最初の行に「flowchart」を記述してください。他の図の記法（graph や flowchart 等）で代用しないでください。
 
 <Information>
 フローチャートの基本構文

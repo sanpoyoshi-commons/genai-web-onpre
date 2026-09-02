@@ -7,9 +7,10 @@
     "build": "tsc && vite build",
     "format": "biome format --write *.config.json && biome format --write src",
     "format:test": "biome format --write tests",
-    "lint": "biome lint src",
+    "lint": "biome lint src tests",
     "preview": "vite preview",
-    "test": "vitest run"
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "npm run typecheck && vitest run"
   },
   "dependencies": {
     "@digital-go-jp/tailwind-theme-plugin": "^0.3.4",
@@ -18,7 +19,7 @@
     "@hookform/resolvers": "^5.2.2",
     "file-type": "^22.0.1",
     "immer": "^11.1.4",
-    "mermaid": "^11.15.0",
+    "mermaid": "~11.16.1",
     "oidc-client-ts": "^3.1.0",
     "react": "^19.2.5",
     "react-color": "^2.19.3",
