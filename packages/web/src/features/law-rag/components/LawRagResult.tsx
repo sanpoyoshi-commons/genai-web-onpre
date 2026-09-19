@@ -34,7 +34,10 @@ export const LawRagResult = () => {
               <ButtonCopy text={response.outputs} targetRef={copyTextRef} />
             </div>
             <div ref={copyTextRef}>
-              <Markdown>{response.outputs}</Markdown>
+              {/* コピーボタンは absolute で右上に重ねている。見出しから始まる通常のレポートは
+                  ボタンと衝突しないが、見出しを持たない応答（該当条文が見当たらない旨など）は
+                  1 行目が全幅に回り込んでボタンの下へ潜る。先頭ブロックだけ右を空けて避ける。 */}
+              <Markdown className='[&>*:first-child]:pr-28'>{response.outputs}</Markdown>
             </div>
             {/* 版の一覧はコピー対象（copyTextRef）の外に置く＝コピーされるのはレポート本文のみ。 */}
             <LawRagVersions response={response} />
