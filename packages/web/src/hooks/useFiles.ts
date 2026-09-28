@@ -263,15 +263,11 @@ const useFilesState = create<{
 
     let targetIndex = findTargetIndex();
     if (targetIndex > -1) {
-      // S3 Key にはスラッシュや `:` を含む (例: `{identityId}/{uuid}/{filename}`)
-      // ため、URL のパス部分全体を復号して Key として扱う
+      // S3 Key にはスラッシュや `:` を含む (例: `{identityId}/{uuid}/{filename}`) ため、
+      // URL からキー全体を取り出して復号する。path-style の URL ではパスの先頭がバケット名に
+      // なるので、pathname をそのままキーにはできない（api の所有権判定で 403 になる）。
       const s3Url = get().uploadedFilesDict[id][targetIndex].s3Url ?? '';
-      let fileName: string | undefined;
-      try {
-        fileName = decodeURIComponent(new URL(s3Url).pathname.replace(/^\//, ''));
-      } catch {
-        fileName = undefined;
-      }
+      const fileName = fileApi.extractStorageKey(s3Url);
 
       if (fileName) {
         // Set deleting state

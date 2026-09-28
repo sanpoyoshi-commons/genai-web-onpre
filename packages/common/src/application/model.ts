@@ -30,28 +30,32 @@ export const modelMetadata: Record<string, ModelMetadata> = {
   // modelId を素通しするローカルモデル。上流の Bedrock metadata に存在しないと
   // capability 参照（flags）が undefined になり ChatPage が crash するため明示登録する。
   // text+doc を既定にしてドキュメントアップロード（ストレージ保存経路）を有効化。
-  // 画像/動画は非対応（vision 非対応の汎用 7B/3B 想定）。運用者が別モデルを使う場合は
-  // ここに追記する（未登録でも useFileUploadable は防御的にフォールバックし crash しない）。
+  // 画像は**入力の対応を公表しているモデルだけ** true にする（2026-09-27：Gemma 4 系の4つ）。
+  // api は画像を base64 の data URI にして Ollama の OpenAI 互換 `image_url` へ渡す。
+  // vision 非対応のモデルで true にすると、画像が読めないまま送られて的外れな答えになるため、
+  // 汎用の 7B/3B 系は false のままにする。動画はローカル経路に受け口が無く、全モデル非対応。
+  // 運用者が別のモデルを使う場合はここに追記する
+  // （未登録でも useFileUploadable は防御的にフォールバックし crash しない）。
   // == 主軸：Gemma 4（2026-04・Apache-2.0）==
   // 実機検証（2026-05-31）：CPU で e2b が Mistral 7B/Llama 3.2 3B/ELYZA より速く応答品質も良好
   // ＝CPU 品質律速への現実的回答。Apache-2.0＝ライセンス序列◎。各帯の第一推奨に置く。
   // -- 軽量(CPU/〜8GB)：Gemma 4 エッジ系を既定推奨 --
   'gemma4:e4b': {
-    flags: MODEL_FEATURE.TEXT_DOC,
+    flags: MODEL_FEATURE.TEXT_DOC_IMAGE,
     displayName: '軽量｜Gemma 4 E4B（推奨・CPU既定, Apache-2.0）',
   },
   'gemma4:e2b': {
-    flags: MODEL_FEATURE.TEXT_DOC,
+    flags: MODEL_FEATURE.TEXT_DOC_IMAGE,
     displayName: '軽量｜Gemma 4 E2B（推奨・最速, Apache-2.0）',
   },
   // -- 中量(16-32GB/GPU)：Gemma 4 26B MoE（Apache-2.0）--
   'gemma4:26b': {
-    flags: MODEL_FEATURE.TEXT_DOC,
+    flags: MODEL_FEATURE.TEXT_DOC_IMAGE,
     displayName: '中量｜Gemma 4 26B MoE（推奨, Apache-2.0）',
   },
   // -- 大型(GPU)：Gemma 4 31B（Apache-2.0）--
   'gemma4:31b': {
-    flags: MODEL_FEATURE.TEXT_DOC,
+    flags: MODEL_FEATURE.TEXT_DOC_IMAGE,
     displayName: '大型｜Gemma 4 31B（推奨, Apache-2.0）',
   },
   // == 他選択肢（operator が自環境で選べる思想は維持）==

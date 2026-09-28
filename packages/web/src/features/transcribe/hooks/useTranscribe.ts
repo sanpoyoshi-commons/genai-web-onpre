@@ -1,3 +1,4 @@
+import { extractStorageKey } from '@/lib/fileApi';
 import { useTranscribeStore } from '../stores/useTranscribeStore';
 import { useFetchTranscription } from './useFetchTranscription';
 import { useTranscribeApi } from './useTranscribeApi';
@@ -26,8 +27,13 @@ export const useTranscribe = () => {
     // 音声のアップロード
     await api.uploadAudio(signedUrl, { file: targetFile });
 
-    // 署名付き URL から S3 Key を抽出 (`{identityId}/{uuid}/{filename}` 形式)
-    const audioKey = decodeURIComponent(new URL(signedUrl).pathname.replace(/^\//, ''));
+    // 署名付き URL から S3 Key を抽出 (`{identityId}/{uuid}/{filename}` 形式)。
+    // path-style の URL ではパスの先頭がバケット名になるので、pathname をそのままキーにはできない
+    // （api の所有権判定で 403 になる）。
+    const audioKey = extractStorageKey(signedUrl);
+    if (!audioKey) {
+      return;
+    }
 
     // 音声認識
     const startTranscriptionRes = await api.startTranscription({

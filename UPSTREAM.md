@@ -84,6 +84,33 @@ git push origin --tags
 `packages/web/src/features/generate-diagram/utils/*.test.ts` が守っている。
 `npm run web:test` が通れば、乖離が保たれているか確認できる。
 
+### 6-3. 添付の対応範囲とモデルの画像フラグ（ローカル経路）
+
+上流は添付の中身を Amazon Bedrock（Converse の `document`／`image` ブロック）に読ませる。ローカルの
+Ollama にはその受け口が無く、api が自分で文字を取り出す（`genai-ai-api-onpre` の `src/lib/attachments`）。
+取り出せる形式と、画像を渡してよいモデルが上流と違うため、以下を調整してある。
+
+| パス | 調整の内容 |
+| ---- | ---------- |
+| `packages/web/src/features/chat/constants.ts`（`FILE_LIMIT.accept`） | `doc` から `.doc`・`.xls`・`.gif` を、`image` から `.webp` を**外した**（理由は下の3点）。上流の一覧は doc が `.csv .doc .docx .html .md .pdf .txt .xls .xlsx .gif`、image が `.jpg .jpeg .png .webp` |
+| `packages/web/src/features/chat/constants.ts`（画像の上限） | `maxImageFileCount` 20 → **3**、`maxImageFileSizeMB` 3.75 → **2**。api の `ATTACHMENT_MAX_IMAGES`（既定 3）に合わせ、送信の本文（base64）が `API_JSON_BODY_LIMIT`（48mb）に収まるようにするため。上流の 20 件 × 3.75MB は base64 で約 100MB になり、この構成では 413 になる |
+| `packages/common/src/application/model.ts`（ローカルモデルの `flags`） | Gemma 4 系の4つ（`e4b`・`e2b`・`26b`・`31b`）だけ `image: true`（`TEXT_DOC_IMAGE`）。ほかのローカルモデル（Mistral 7B・Llama 3.2 3B・ELYZA・Swallow・Mixtral・Llama 3.3 70B）は `TEXT_DOC` のまま。**入力の画像対応を公表しているモデルだけ**を true にする方針 |
+
+外した3種の理由：
+
+| 拡張子 | 理由 |
+| ---- | ---------- |
+| `.doc`・`.xls` | 旧 OLE バイナリ。現役の純 JS 実装が無く、api が中身を読めない |
+| `.gif` | Ollama v0.31.2 の OpenAI 互換は、データ URI の型を `jpeg`・`jpg`・`png`・`webp` だけ受け付け、gif は `invalid image input` で落とす（`openai/openai.go` の `decodeImageURL`） |
+| `.webp` | Ollama v0.31.2 が同梱する `golang.org/x/image` v0.22.0 に webp の既知の脆弱性が2件ある（GO-2026-5061・CVE-2026-46603＝panic とメモリ枯渇の DoS。上げ先なし）。api は**中身の先頭バイトで PNG と JPEG だけを通す**ので、`.webp` を選べても渡らない |
+
+- 上流はこれらのモデルを metadata に持たない（Bedrock 前提）ので、**上流の変更と衝突しにくい**。衝突した
+  場合は本リポジトリ側を残す。
+- 運用者が別の vision 対応モデルを pull したときは `model.ts` に追記する。未登録でも
+  `useFileUploadable` は防御的にフォールバックし、画面は落ちない。
+- 乖離が失われていないことは `packages/web/tests/features/chat/fileLimit.test.ts` と
+  `packages/web/tests/application/modelMetadata.test.ts` が守っている。
+
 ## 7. 運用注記
 
 ### 7-1. タグだけ進む現象の扱い
