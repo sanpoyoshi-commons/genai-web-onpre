@@ -15,8 +15,15 @@
 #   - react-router 7.17.0 → 7.18.2（packages/web の直接依存。修正版 7.18.2）
 # 以前の版（undici・vite）と同じく、版を上げて消えたものは本ファイルに残さない。
 #
-# 2026-09-26 に、以下の 8 件を登録し直した（期限の延長ではなく、判定を確認し直したうえでの再登録。
+# 2026-09-26 に、当時の 8 件を登録し直した（期限の延長ではなく、判定を確認し直したうえでの再登録。
 # 期限は登録日 +2 週間）。期限が来たら再 scan し、判定と配信非到達を必ず確認し直すこと。
+#
+# 2026-10-03 に、以下の 9 件を登録し直した（同じく延長ではなく、判定を確認し直したうえでの再登録。
+# 期限は登録日 +2 週間 = 2026-10-17）:
+#   - 既存の 8 件は、判定が「該当（監視のみ）」から変わっていないことを、GHSA と CVE の両方の
+#     採番で確認し直した（格上げ無し）。
+#   - dompurify の 1 件を新しく登録した。2026-10-03 の scan で初めて出たもので、判定は確定して
+#     いる（下のブロック）。同時に公開されたもう 1 件は scan に出ないため登録しない。
 
 # ---------------------------------------------------------------------------
 # packages/types が持つ @aws-sdk 経由（配信 web からは届かない）
@@ -27,17 +34,22 @@
 #   packages/types -> @aws-sdk/client-bedrock-agent-runtime@3.1029.0 -> @aws-sdk/core@3.973.27
 #   -> @aws-sdk/xml-builder@3.972.17 -> fast-xml-parser@5.5.8 -> fast-xml-builder@1.1.4
 # 配信 web（packages/web）は packages/types に依存していない（依存は npm の @types/* だけ）。
+#
+# 解消の手段（2026-10-03 実測）: ワークスペース配下の推移依存には、root の overrides に上げ先を
+# 書いても効かない。npm が既存の package-lock.json を再解決しないため、lock の版が動かない
+# （npm/cli#4834）。この 2 件を消すには親の @aws-sdk の更新が要る（新しい @aws-sdk/xml-builder は
+# fast-xml-parser に依存しない）。別の変更で扱う。
 # ---------------------------------------------------------------------------
 
 [[IgnoredVulns]]
 id = "GHSA-5wm8-gmm8-39j9"
-ignoreUntil = 2026-10-10
-reason = "fast-xml-builder@1.1.4 (attribute bypass). 該当（監視のみ・攻撃面クローズ）。packages/types の @aws-sdk 経由（client-bedrock-agent-runtime <- @aws-sdk/core <- @aws-sdk/xml-builder <- fast-xml-parser）でのみ入る。2026-09-26 に npm ls で経路を実測。配信バンドル0件・直接呼び出し0件は 2026-09-23 実測。"
+ignoreUntil = 2026-10-17
+reason = "fast-xml-builder@1.1.4 (attribute bypass). 該当（監視のみ・攻撃面クローズ）。affected <=1.1.6。packages/types の @aws-sdk 経由（client-bedrock-agent-runtime <- @aws-sdk/core <- @aws-sdk/xml-builder <- fast-xml-parser）でのみ入る。@aws-sdk は packages/types の型定義でしか参照されず、実行時の import は 0 件。経路は 2026-09-26 に npm ls で実測、配信バンドル0件・直接呼び出し0件は 2026-09-23 実測。修正版 1.1.7 以上。2026-10-03 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-gh4j-gqv2-49f6"
-ignoreUntil = 2026-10-10
-reason = "fast-xml-parser@5.5.8 (comment/CDATA injection). 該当（監視のみ・攻撃面クローズ）。packages/types の @aws-sdk 経由（client-bedrock-agent-runtime <- @aws-sdk/core <- @aws-sdk/xml-builder）でのみ入る。2026-09-26 に npm ls で経路を実測。配信バンドル0件・直接呼び出し0件は 2026-09-23 実測。"
+ignoreUntil = 2026-10-17
+reason = "fast-xml-parser@5.5.8 (comment/CDATA injection). 該当（監視のみ・攻撃面クローズ）。affected <5.7.0。packages/types の @aws-sdk 経由（client-bedrock-agent-runtime <- @aws-sdk/core <- @aws-sdk/xml-builder）でのみ入る（@aws-sdk/xml-builder 3.972.17 が 5.5.8 を版固定で引く）。実行時の import は 0 件。経路は 2026-09-26 に npm ls で実測、配信バンドル0件・直接呼び出し0件は 2026-09-23 実測。修正版 5.7.0 以上（@aws-sdk 側は 3.1038.0 以上）。2026-10-03 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
 
 # ---------------------------------------------------------------------------
 # dev / build / test のみ（配信 web 非到達）
@@ -45,30 +57,44 @@ reason = "fast-xml-parser@5.5.8 (comment/CDATA injection). 該当（監視のみ
 
 [[IgnoredVulns]]
 id = "GHSA-2v37-7h3g-55p8"
-ignoreUntil = 2026-10-10
-reason = "nanoid@3.3.15 / CVE-2026-67213 (dev, postcss 経由の推移). 該当（監視のみ・修正版 3.3.18）。dev/build のみで配信web 非到達。2026-09-26 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "nanoid@3.3.15 / CVE-2026-67213 (dev, postcss 経由の推移). 該当（監視のみ・修正版 3.3.18）。dev/build のみで配信web 非到達。2026-10-03 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-28wg-ghj8-5hjv"
-ignoreUntil = 2026-10-10
-reason = "nanoid@3.3.15 / CVE-2026-67214 (dev, postcss 経由の推移). 該当（監視のみ・修正版 3.3.18）。dev/build のみで配信web 非到達。2026-09-26 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "nanoid@3.3.15 / CVE-2026-67214 (dev, postcss 経由の推移). 該当（監視のみ・修正版 3.3.18）。dev/build のみで配信web 非到達。2026-10-03 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-6g55-p6wh-862q"
-ignoreUntil = 2026-10-10
-reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-09-26 に判定を確認し直した（変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-10-03 に判定を確認し直した（変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-r28c-9q8g-f849"
-ignoreUntil = 2026-10-10
-reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-09-26 に判定を確認し直した（変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-10-03 に判定を確認し直した（変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-fxqj-rqcc-2cmp"
-ignoreUntil = 2026-10-10
-reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-09-26 に判定を確認し直した（変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "postcss@8.5.10 (dev). 該当（監視のみ・修正版 8.5.23 以上）。sourceMappingURL 解析の 3 件連鎖（GHSA-6g55 / GHSA-r28c / GHSA-fxqj）のうちの 1 件。dev/build のみで配信web 非到達。2026-10-03 に判定を確認し直した（変化なし）。"
 
 [[IgnoredVulns]]
 id = "GHSA-82fw-gwwq-j7x9"
-ignoreUntil = 2026-10-10
-reason = "vitest / @vitest/mocker@4.1.4 / CVE-2026-84373 (devDependency). 該当（監視のみ・攻撃面クローズ・修正版 4.1.11）。テスト実行時のみで配信web 非到達。2026-09-26 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
+ignoreUntil = 2026-10-17
+reason = "vitest / @vitest/mocker@4.1.4 / CVE-2026-84373 (devDependency). 該当（監視のみ・攻撃面クローズ・修正版 4.1.11）。テスト実行時のみで配信web 非到達。2026-10-03 に判定を確認し直した（GHSA・CVE の両方の採番で突合。判定・修正版に変化なし）。"
+
+# ---------------------------------------------------------------------------
+# 配信 web に同梱されるが、発火の前提が構成上成立しない
+# 判定: 該当（監視のみ・確定）。到達性ではなく発火条件で切っている。
+#
+# dompurify は mermaid 11.16.1 経由の推移依存で、配信バンドルには入る。発火には sanitize の
+# IN_PLACE 指定が必須で、mermaid 11.16.1 に IN_PLACE は 0 件、hook 2 件はいずれも要素を削除
+# しない。packages/web 側にも IN_PLACE・addHook・dompurifyConfig は 0 件（2026-10-02 実測）。
+# ---------------------------------------------------------------------------
+
+[[IgnoredVulns]]
+id = "GHSA-p98j-92pf-mc4p"
+ignoreUntil = 2026-10-17
+reason = "dompurify@3.4.13 (IN_PLACE: node-removing afterSanitize hook leaves detached subtree event handlers armed). 該当（監視のみ・確定＝発火前提が構成上不成立）。affected >=3.4.13 <=3.4.15。mermaid 11.16.1 経由の推移で配信バンドルに同梱されるが、発火には sanitize の IN_PLACE 指定が必須で、mermaid 11.16.1 に IN_PLACE 0件・hook 2件とも要素を削除せず、packages/web 側にも IN_PLACE・addHook・dompurifyConfig は0件（2026-10-02 実測）。修正版 3.4.16。2026-10-03 に判定を確認し直した。同時に公開された GHSA-6688-9rhm-gjv2（affected <=3.4.15・修正版も 3.4.16）は scan に出ないため登録しない（検出されない ID を登録すると、使われない除外が残るため）。"
