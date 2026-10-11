@@ -231,3 +231,152 @@ export type LawRagQueryResponse = {
   dataAsOf?: LawRagDataAsOf;
   references?: LawRagReference[];
 };
+
+// 汎用 RAG のナレッジ集（POST/GET /rag/collections ほか、-onpre 新規）。
+// api 側（genai-ai-api-onpre の routes/rag/）と 1:1 で整合させる。
+// 保存は 3 層（原本／抽出テキスト／チャンクと埋め込み）。原本を持たない文書は作り直せない。
+export type RagCollection = {
+  collectionId: string;
+  name: string;
+  description: string | null;
+  // 外部のエージェントへ検索を開くかどうか。切り替えの口ができるまで常に false。
+  mcpEnabled: boolean;
+  documentCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ListRagCollectionsResponse = {
+  collections: RagCollection[];
+};
+
+export type CreateRagCollectionRequest = {
+  name: string;
+  description?: string;
+};
+
+export type UpdateRagCollectionRequest = {
+  name?: string;
+  description?: string;
+};
+
+// 取り込みの結果。ready＝チャンクまで作れた／failed＝本文を取り出せなかった（原本は残る）。
+export type RagDocumentStatus = 'ready' | 'failed';
+
+export type RagKnowledgeDocument = {
+  documentId: string;
+  collectionId: string;
+  title: string;
+  mime: string | null;
+  originalFilename: string | null;
+  byteSize: number | null;
+  charCount: number | null;
+  chunkCount: number;
+  extractor: string | null;
+  extractorVersion: string | null;
+  status: RagDocumentStatus;
+  error: string | null;
+  // 原本を持つか。false の文書は抽出やチャンクの作り直しができない。
+  hasBronze: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ListRagDocumentsResponse = {
+  documents: RagKnowledgeDocument[];
+};
+
+// 投入。bronzeKey（署名付き URL で上げた原本）か text（貼り付け）のどちらか一方。
+export type IngestRagDocumentRequest = {
+  title?: string;
+  bronzeKey?: string;
+  text?: string;
+};
+
+export type IngestRagDocumentResponse = {
+  documentId: string;
+  collectionId: string;
+  title: string;
+  status: RagDocumentStatus;
+  charCount: number;
+  chunkCount: number;
+  mime?: string;
+  originalFilename?: string;
+  byteSize?: number;
+  extractor?: string;
+  extractorVersion?: string;
+  // status が failed のときの理由。
+  error?: string;
+};
+
+// 検索だけ（生成しない）。0 件は results: []。
+export type RagSearchRequest = {
+  query: string;
+  collectionIds?: string[];
+  topK?: number;
+};
+
+export type RagSearchResult = {
+  documentId: string;
+  title: string;
+  collectionId: string;
+  chunkIndex: number;
+  headerPath: string | null;
+  // チャンク本文。**文字列として描画する**（HTML や Markdown として解釈させない）。
+  text: string;
+  // RRF の融合スコア。
+  score: number;
+  // リランカのスコア（rerank が効いたときだけ）。
+  rerankScore?: number;
+};
+
+export type RagSearchResponse = {
+  results: RagSearchResult[];
+};
+
+// 問う（既存の POST /rag/query）。上流 ExApp 契約の inputs は変えず、collectionIds を外側に足す。
+export type RagQueryRequest = {
+  inputs: {
+    question: string;
+  };
+  model?: {
+    modelId?: string;
+  };
+  collectionIds?: string[];
+};
+
+export type RagQueryResponse = {
+  outputs: string;
+  usageMetadata: unknown[];
+};
+
+// 回答と参照を構造で返す（POST /rag/ask、-onpre 新規）。
+// /rag/query（上流 ExApp 契約）は回答の末尾に出典を文字列で連結するため、画面は「この引用の根拠は
+// どのチャンクか」を知れない。本ルートは回答と参照を分けて返し、引用番号にチャンク本文を結び付ける。
+export type RagAskRequest = {
+  question: string;
+  model?: {
+    modelId?: string;
+  };
+  collectionIds?: string[];
+};
+
+// 参照 1 件。n は回答本文の [n] に対応する 1 起点の番号。
+export type RagReference = {
+  n: number;
+  documentId: string;
+  title: string;
+  collectionId: string;
+  chunkIndex: number;
+  headerPath: string | null;
+  // チャンク本文。**文字列として描画する**（HTML や Markdown として解釈させない）。
+  text: string;
+  score: number;
+  rerankScore?: number;
+};
+
+export type RagAskResponse = {
+  // 回答（Markdown）。出典節は連結されていない＝参照は references で受け取る。
+  answer: string;
+  references: RagReference[];
+};

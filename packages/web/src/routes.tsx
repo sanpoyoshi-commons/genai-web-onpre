@@ -7,6 +7,7 @@ import { ExAppsPage } from '@/features/exapps/ExAppsPage';
 import { GenerateDiagramPage } from '@/features/generate-diagram/GenerateDiagramPage';
 import { GenerateImagePage } from '@/features/generate-image/GenerateImagePage';
 import { GenerateTextPage } from '@/features/generate-text/GenerateTextPage';
+import { KnowledgePage } from '@/features/knowledge/KnowledgePage';
 import { LandingPage } from '@/features/landing/LandingPage';
 import { LawRagPage } from '@/features/law-rag/LawRagPage';
 import { TeamAppCopyPage } from '@/features/team-apps/copy/TeamAppCopyPage';
@@ -75,6 +76,8 @@ export const createRoutes = (): RouteObject[] => {
         // 法令調査（法令 RAG）は embedding profile（rag）依存＝汎用 RAG と同じ埋め込みスタックを使うため
         // 専用キーを設けず 'rag' で連動させる。profile off 時は api が 403/503。
         isUseCaseEnabled('rag') ? { path: 'law-rag', element: <LawRagPage /> } : null,
+        // ナレッジ集（汎用 RAG）も embedding profile（rag）依存。法令調査と同じ条件で点灯させる。
+        isUseCaseEnabled('rag') ? { path: 'knowledge', element: <KnowledgePage /> } : null,
         { path: 'teams', element: <TeamsPage /> },
         { path: 'teams/create', element: <TeamCreatePage /> },
         {

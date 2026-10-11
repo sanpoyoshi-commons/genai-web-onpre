@@ -20,6 +20,7 @@ export const GEN_U_MENU_ITEMS: MenuItemProps[] = [
   ...(isUseCaseEnabled('codeInterpreter')
     ? [{ label: 'データ分析', to: '/code-interpreter' }]
     : []),
-  // 法令調査（法令 RAG）は embedding profile（rag）連動。
+  // 法令調査（法令 RAG）とナレッジ集（汎用 RAG）は embedding profile（rag）連動。
   ...(isUseCaseEnabled('rag') ? [{ label: '法令調査', to: '/law-rag' }] : []),
+  ...(isUseCaseEnabled('rag') ? [{ label: 'ナレッジ集', to: '/knowledge' }] : []),
 ];
