@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { BundledLanguage, codeToHtml } from 'shiki';
 import { Link } from '@/components/ui/dads/Link';
 import { MermaidRenderer } from '@/features/exapp/components/MermaidRenderer';
+import { MarkdownImage } from './MarkdownImage';
 import { ButtonCopy } from './ui/ButtonCopy';
 import { ErrorText } from './ui/dads/ErrorText';
 
@@ -26,9 +27,6 @@ const LinkRenderer = (props: ComponentProps<'a'>) => {
       {props.children}
     </Link>
   );
-};
-const ImageRenderer = (props: ComponentProps<'img'>) => {
-  return <img id={props.id} src={props.src} alt={props.alt} {...props} />;
 };
 
 type CodeBlockProps = {
@@ -97,7 +95,7 @@ const CodeRenderer = ({ className, children, node }: ComponentProps<'code'> & Ex
 
 const components: ComponentProps<typeof ReactMarkdown>['components'] = {
   a: LinkRenderer,
-  img: ImageRenderer,
+  img: MarkdownImage,
   sup: SupRenderer,
   code: CodeRenderer,
 };

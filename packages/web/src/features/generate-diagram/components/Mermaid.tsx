@@ -9,6 +9,8 @@ const defaultConfig: MermaidConfig = {
   fontFamily: 'monospace', // フォントファミリーを指定
   fontSize: 16, // フォントサイズを指定
   htmlLabels: true, // HTMLラベルを許可
+  theme: 'default', // mermaid 12 の既定は redux-color。従来の見た目を保つため明示する
+  look: 'classic', // mermaid 12 の既定は neo。従来の見た目を保つため明示する
 };
 
 mermaid.initialize(defaultConfig);

@@ -5,14 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="google" content="notranslate" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      書体は端末に入っているものに任せる（外部から CSS を読み込まない）。
+      利用者の端末から第三者へ要求を出さず、外部へ出られない網でも描画が止まらない
+      ようにするため。上流追従時に Google Fonts の link を戻さない（UPSTREAM.md §6-4）。
+    -->
   </head>
   <body>
     <h1>メンテナンス中</h1>

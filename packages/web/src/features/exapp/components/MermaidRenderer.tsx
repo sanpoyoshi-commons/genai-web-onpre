@@ -8,6 +8,7 @@ const defaultConfig: MermaidConfig = {
   fontSize: 16,
   htmlLabels: true,
   theme: 'default',
+  look: 'classic', // mermaid 12 の既定は neo。従来の見た目を保つため明示する
 };
 
 mermaid.initialize(defaultConfig);

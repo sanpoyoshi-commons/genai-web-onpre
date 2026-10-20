@@ -111,6 +111,67 @@ Ollama にはその受け口が無く、api が自分で文字を取り出す（
 - 乖離が失われていないことは `packages/web/tests/features/chat/fileLimit.test.ts` と
   `packages/web/tests/application/modelMetadata.test.ts` が守っている。
 
+### 6-4. 書体は端末に任せる（外部の CSS を読み込まない）
+
+上流の HTML は Google Fonts の CSS（Noto Sans JP・Noto Sans Mono）を `<link rel="stylesheet">` で
+2 本読み込む。本リポジトリはこれを**外し、書体は利用者の端末に入っているものに任せる**。
+
+| パス | 調整の内容 |
+| ---- | ---------- |
+| `packages/web/index.html` | `https://fonts.googleapis.com/css2?...` の `<link>` 2 本を削除（理由は同ファイルのコメントに書いてある） |
+| `packages/web/403.html` | 同上 |
+| `packages/web/maintenance.html` | 同上 |
+
+外した理由：
+
+- **利用者の端末から第三者へ要求を出さない。** 画面を開くだけで、閲覧者のアドレスと
+  ユーザーエージェントが第三者へ渡る。閉じた網で使う前提に合わない。
+- **中身がブラウザごとに変わり、版の固定も SRI もできない外部の CSS を読まない。**
+  `css2` の応答は要求元の対応状況で変わるため `integrity` を付けられず、配信物として固定できない。
+- **外部へ出られない網でも描画が止まらない。** stylesheet の読み込みは描画を阻む。宛先へ
+  到達できない網では、タイムアウトまで画面が出ない。
+
+書体の指定（`@digital-go-jp/tailwind-theme-plugin` 0.3.4 の `fontFamily`。`sans` は
+`'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif`、`mono` は
+`'Noto Sans Mono', monospace`）は**変えない**。端末に Noto Sans JP・Noto Sans Mono が
+入っていればそれが使われ、無ければ後続の候補（OS の UI 書体・`sans-serif`・`monospace`）へ落ちる。
+
+**上流追従時に `<link>` を戻さない。** 上流は CloudFront 配信・インターネット前提のため、この
+読み込みが問題として現れない。上流にとっての不具合ではなく、本リポジトリの実行条件（閉じた網・
+端末に入っている書体）に合わせた調整である。乖離が失われていないことは
+`packages/web/tests/html/externalResources.test.ts` が守っている（`npm run web:test` で走る）。
+
+**注**：`403.html`／`maintenance.html` は現在の配信物に入っていない。`vite.config.ts` に入力の
+指定が無く（`index.html` だけがビルドされる）、2 つを `dist/` へ複写するのは上流のクラウド用の
+構成だけで、デプロイ層も参照していない。将来使うときに乖離が戻らないよう、3 つそろえて直してある。
+
+### 6-5. Markdown の中の外部の画像を読み込まない
+
+上流の Markdown は、画像の宛先をそのまま `img` に渡す。Markdown の中身はモデルの出力や
+利用者が貼り付けた文字で、宛先をこちらで選べないため、外部を指す URL が入っていると、画面を
+開いただけで利用者の端末から第三者へ要求が出る。§6-4 と同じ方針で、**同じ配信元の画像と手元に
+ある画像（`data:`・`blob:`）だけを描き、それ以外は読み込まずに alt と宛先を文字で出す**。
+宛先を開くかどうかは利用者が決める（リンクは `target="_blank"`・`rel="noreferrer noopener"`）。
+
+| パス | 調整の内容 |
+| ---- | ---------- |
+| `packages/web/src/utils/imageSrc.ts` | 追加。相対・同じ配信元・`data:`・`blob:` だけを自動で描いてよいとする判定 |
+| `packages/web/src/components/MarkdownImage.tsx` | 追加。Markdown の `img` の描画先。描くか文字にするかを決める |
+| `packages/web/src/components/Markdown.tsx` | 上流の `ImageRenderer`（宛先をそのまま `img` に渡す）を外し、`img` に `MarkdownImage` を割り当てた |
+| `packages/web/src/features/generate-diagram/components/Markdown.tsx` | 同上（上流は同じ `ImageRenderer` を両ファイルに持っている） |
+| `packages/web/src/features/knowledge/components/AnswerWithCitations.tsx` | `img` に `MarkdownImage` を割り当てた（汎用 RAG の回答＝モデルの出力を描く） |
+| `packages/web/src/features/exapp/components/ExAppUsageMarkdownRenderer.tsx` | 同上（アプリの使い方の文を描く）。上流はこの 2 つに `img` の割り当てが無く、宛先をそのまま `img` に渡す |
+
+この構成では、アプリ自身が Markdown に画像を差し込む経路は無い（アプリが出す画像は `img` に
+`data:` を直接渡し、添付は専用のコンポーネントが描く）。表示が変わるのは、モデルの出力や貼り付けた
+文字に外部の画像の URL が入っていたときだけである。同じ配信元でない保管先（別のポートなど）の
+署名付き URL を Markdown に差し込む使い方を始めるときは、この判定を見直す。
+
+**上流追従時に戻さない。** 上流はインターネット前提の配信で、この読み込みが問題として現れない。
+上流にとっての不具合ではなく、本リポジトリの実行条件に合わせた調整である。乖離が失われていない
+ことは `packages/web/tests/components/MarkdownImage.test.tsx` と
+`packages/web/tests/utils/imageSrc.test.ts` が守っている（`npm run web:test` で走る）。
+
 ## 7. 運用注記
 
 ### 7-1. タグだけ進む現象の扱い

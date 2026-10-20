@@ -7,14 +7,14 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon_180x180.png" sizes="180x180" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      書体は端末に入っているものに任せる（外部から CSS を読み込まない）。
+      利用者の端末から第三者へ要求を出さず、版の固定も SRI もできない外部の CSS に
+      描画を依存させず、外部へ出られない網でも描画が止まらないようにするため。
+      書体の指定は @digital-go-jp/tailwind-theme-plugin の fontFamily に従い、
+      該当の書体が端末に無ければ OS の既定の sans-serif・monospace へ落ちる。
+      上流追従時に Google Fonts の link を戻さない（UPSTREAM.md §6-4）。
+    -->
     <!--
       Runtime config (on-premise). nginx が .env の MODEL_IDS から実行時生成する
       classic blocking script。module バンドルより前に window.__APP_CONFIG__ を

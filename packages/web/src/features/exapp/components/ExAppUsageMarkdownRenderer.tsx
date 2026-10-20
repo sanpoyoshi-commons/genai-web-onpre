@@ -5,6 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import remarkDirective from 'remark-directive';
 import remarkDirectiveRehype from 'remark-directive-rehype';
 import remarkGfm from 'remark-gfm';
+import { MarkdownImage } from '@/components/MarkdownImage';
 import { Disclosure, DisclosureSummary } from '@/components/ui/dads/Disclosure';
 import { ErrorText } from '@/components/ui/dads/ErrorText';
 import { Link } from '@/components/ui/dads/Link';
@@ -27,6 +28,8 @@ type CustomComponents = Components & {
 };
 
 const components: CustomComponents = {
+  // 外部の画像を自動で読み込まない（UPSTREAM.md §6-5）。
+  img: MarkdownImage,
   a: (props: ComponentProps<'a'>) => {
     if (props.href?.startsWith('http')) {
       return (

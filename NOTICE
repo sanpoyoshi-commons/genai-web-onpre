@@ -46,6 +46,10 @@ Copyright (c) 2026 Rifu.Sakamoto
   本リポジトリが依存する第三者 OSS のライセンス本文は LICENSES-THIRD-PARTY/
   ディレクトリに保全されています。
 
+  ビルドで配信バンドルに入る elkjs（mermaid の依存。Eclipse Public License 2.0）
+  のライセンス本文は LICENSES-THIRD-PARTY/elkjs_EPL-2.0.txt にあります。elkjs の
+  ソースコードは https://github.com/kieler/elkjs （タグ 0.9.3）から入手できます。
+
 --------------------------------------------------------------------------------
 免責事項（Disclaimer）
 --------------------------------------------------------------------------------

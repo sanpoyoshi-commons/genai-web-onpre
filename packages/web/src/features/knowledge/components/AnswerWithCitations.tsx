@@ -4,6 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import { MarkdownImage } from '@/components/MarkdownImage';
 import { ErrorText } from '@/components/ui/dads/ErrorText';
 import { CitationMarker } from './CitationMarker';
 
@@ -62,6 +63,8 @@ export const AnswerWithCitations = (props: Props) => {
 
   const components = useMemo(
     () => ({
+      // 外部の画像を自動で読み込まない（UPSTREAM.md §6-5）。
+      img: MarkdownImage,
       p: ({ children }: { children?: ReactNode }) => <p>{withCitations(children, byNumber)}</p>,
       li: ({ children }: { children?: ReactNode }) => <li>{withCitations(children, byNumber)}</li>,
       td: ({ children }: { children?: ReactNode }) => <td>{withCitations(children, byNumber)}</td>,
